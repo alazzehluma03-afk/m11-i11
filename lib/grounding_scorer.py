@@ -22,8 +22,7 @@ def is_decline(response: dict) -> bool:
 
     Case-sensitive, punctuation-sensitive, exact-match.
     """
-    # TODO: implement per the methodology.
-    raise NotImplementedError
+    return response.get("answer") == DECLINE_STRING
 
 
 def is_grounded(response: dict, candidate_ids: Iterable[str]) -> bool:
@@ -32,5 +31,13 @@ def is_grounded(response: dict, candidate_ids: Iterable[str]) -> bool:
     (a) response.citations has length >= 1.
     (b) every chunk_id in response.citations is in candidate_ids.
     """
-    # TODO: implement per the methodology.
-    raise NotImplementedError
+    citations = response.get("citations") or []
+    if not citations:
+        return False
+
+    candidate_set = set(candidate_ids)
+    for citation in citations:
+        chunk_id = citation.get("chunk_id") if isinstance(citation, dict) else citation
+        if chunk_id not in candidate_set:
+            return False
+    return True

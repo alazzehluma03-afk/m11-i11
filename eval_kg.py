@@ -40,13 +40,64 @@ def load_fixture():
 
 def run() -> Tuple[float, list]:
     """Run the harness end-to-end. Returns (exact_match_rate, per_question_results)."""
-    # TODO: implement per the methodology.
-    # Steps:
-    #   1. Load the fixture.
-    #   2. For each question, POST /kg/query with {"question": q}.
-    #   3. If the response is 422 with UnsupportedQueryError, mark the question
-    #      "excluded" -- do not count it in the denominator.
-    #   4. Otherwise, read the returned cypher field, normalize both predicted
-    #      and gold via lib.cypher_normalizer.normalize_cypher, compare.
-    #   5. Aggregate exact-match rate = matched / (total - excluded).
-    raise NotImplementedError
+    fixture = load_fixture()
+    per_question_results = []
+    matched_count = 0
+    denominator = 0
+
+    for row in fixture:
+        question_id = row["question_id"]
+        question = row.get("question", "")
+        gold_cypher = row.get("gold_cypher", "")
+
+        response = httpx.post(
+            f"{API_URL}/kg/query",
+            json={"question": question},
+            timeout=60.0,
+        )
+        payload = response.json() if hasattr(response, "json") else {}
+        status_code = getattr(response, "status_code", 200)
+
+        if status_code == 422:
+            detail = payload.get("detail", {}) if isinstance(payload, dict) else {}
+            reason = detail.get("reason") if isinstance(detail, dict) else None
+            if reason == "UnsupportedQueryError" or "UnsupportedQueryError" in str(detail):
+                per_question_results.append(
+                    {
+                        "question_id": question_id,
+                        "matched": False,
+                        "excluded": True,
+                        "status_code": status_code,
+                        "predicted_cypher": None,
+                        "gold_cypher": gold_cypher,
+                    }
+                )
+                continue
+
+        if status_code >= 500:
+            matched = False
+            excluded = False
+        else:
+            predicted_cypher = (payload.get("cypher") if isinstance(payload, dict) else "") or ""
+            predicted_norm = normalize_cypher(predicted_cypher)
+            gold_norm = normalize_cypher(gold_cypher)
+            matched = predicted_norm == gold_norm
+            excluded = False
+
+        denominator += 1
+        if matched:
+            matched_count += 1
+
+        per_question_results.append(
+            {
+                "question_id": question_id,
+                "matched": matched,
+                "excluded": excluded,
+                "status_code": status_code,
+                "predicted_cypher": predicted_cypher if status_code < 500 else None,
+                "gold_cypher": gold_cypher,
+            }
+        )
+
+    exact_match_rate = matched_count / denominator if denominator else 0.0
+    return exact_match_rate, per_question_results
