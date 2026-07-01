@@ -174,6 +174,6 @@ Methodology Rule.
 
 
 ## Derived /metrics Signals
-- /extract: p95=0.0000, Error Rate=0.0000, Request Count=0; error rate=0.0000, request count=0
-- /kg/query: p95=0.0000, Error Rate=0.0000, Request Count=0; error rate=0.0000, request count=0
-- /rag/answer: p95=0.0000, Error Rate=0.0000, Request Count=0; error rate=0.0000, request count=0
+- /extract: p95=0.0049, Error Rate=0.0000, Request Count=30; error rate=0.0000, request count=30
+- /kg/query: p95=0.0047, Error Rate=0.0400, Request Count=25; error rate=0.0400, request count=25
+- /rag/answer: p95=0.0047, Error Rate=0.0000, Request Count=20; error rate=0.0000, request count=20
