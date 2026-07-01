@@ -1,0 +1,22 @@
+[
+  {"question_id": "rag-001", "question": "Which restaurants in the North End are known for Italian food?", "k": 4, "gold_citation_chunk_ids": ["chunk-italian-northend-1", "chunk-italian-northend-2"]},
+  {"question_id": "rag-002", "question": "What seafood restaurants are near the Boston waterfront?", "k": 4, "gold_citation_chunk_ids": ["chunk-seafood-1", "chunk-waterfront-1"]},
+  {"question_id": "rag-003", "question": "Recommend Thai food in Allston.", "k": 4, "gold_citation_chunk_ids": ["chunk-thai-allston-1"]},
+  {"question_id": "rag-004", "question": "Best brunch spots in Cambridge?", "k": 4, "gold_citation_chunk_ids": ["chunk-brunch-cambridge-1", "chunk-brunch-cambridge-2"]},
+  {"question_id": "rag-005", "question": "Where can I find good pizza in Beacon Hill?", "k": 4, "gold_citation_chunk_ids": ["chunk-pizza-bh-1"]},
+  {"question_id": "rag-006", "question": "Vegetarian-friendly restaurants near MIT?", "k": 4, "gold_citation_chunk_ids": ["chunk-veg-mit-1"]},
+  {"question_id": "rag-007", "question": "Where to eat tapas in Boston?", "k": 4, "gold_citation_chunk_ids": ["chunk-tapas-1"]},
+  {"question_id": "rag-008", "question": "Ramen in Back Bay?", "k": 4, "gold_citation_chunk_ids": ["chunk-ramen-bb-1"]},
+  {"question_id": "rag-009", "question": "Mexican restaurants in Jamaica Plain?", "k": 4, "gold_citation_chunk_ids": ["chunk-mexican-jp-1"]},
+  {"question_id": "rag-010", "question": "Where to find Ethiopian food?", "k": 4, "gold_citation_chunk_ids": ["chunk-ethiopian-1"]},
+  {"question_id": "rag-011", "question": "Korean BBQ in Allston?", "k": 4, "gold_citation_chunk_ids": ["chunk-kbbq-allston-1"]},
+  {"question_id": "rag-012", "question": "Late-night dining in Chinatown?", "k": 4, "gold_citation_chunk_ids": ["chunk-late-chinatown-1"]},
+  {"question_id": "rag-013", "question": "Best Sunday brunch downtown?", "k": 4, "gold_citation_chunk_ids": ["chunk-brunch-downtown-1"]},
+  {"question_id": "rag-014", "question": "Greek restaurants in Brookline?", "k": 4, "gold_citation_chunk_ids": ["chunk-greek-brookline-1"]},
+  {"question_id": "rag-015", "question": "Where can I find good ice cream?", "k": 4, "gold_citation_chunk_ids": ["chunk-icecream-1"]},
+  {"question_id": "rag-016", "question": "Fine dining for an anniversary?", "k": 4, "gold_citation_chunk_ids": ["chunk-finedining-1", "chunk-finedining-2"]},
+  {"question_id": "rag-017", "question": "Vegan options in Cambridge?", "k": 4, "gold_citation_chunk_ids": ["chunk-vegan-cam-1"]},
+  {"question_id": "rag-018", "question": "Best burgers in Somerville?", "k": 4, "gold_citation_chunk_ids": ["chunk-burgers-som-1"]},
+  {"question_id": "rag-019", "question": "Where to get dim sum on a Sunday?", "k": 4, "gold_citation_chunk_ids": ["chunk-dimsum-1"]},
+  {"question_id": "rag-020", "question": "Family-friendly restaurants near Fenway?", "k": 4, "gold_citation_chunk_ids": ["chunk-fenway-family-1"]}
+]

@@ -1,0 +1,38 @@
+# Integration 11 — fixture-driven M11-instrumented backend.
+#
+# This Dockerfile builds the `api` service referenced by
+# `compose/docker-compose.yml`. Build context is the repo root (parent of
+# `compose/`); the compose file pins:
+#
+#   build:
+#     context: ..
+#     dockerfile: compose/Dockerfile.api
+#
+# The Integration backend (`api/main.py`) is the fixture-driven reference
+# implementation -- it serves gold values from `data/{ner_conll30,kg_questions,
+# rag_questions}.json` so a correctly-implemented learner harness meets the
+# published floors (NER F1 >= 0.65, NL->Cypher EM >= 0.80, RAG grounding
+# >= 0.85). The backend has no spaCy / torch / transformers dependency; the
+# image stays small. (The companion Lab vendored Dockerfile pins
+# `en_core_web_sm` 3.7.1 because the Lab's backend uses the M10 NLP pipeline;
+# the Integration backend is deliberately fixture-driven and does not.)
+#
+# Running `uvicorn api.main:app` from /app loads the `api` package so the
+# absolute imports in `api/main.py` resolve. The fixture JSON files live at
+# `/app/data/` because `api/main.py` resolves them via
+# `os.path.join(os.path.dirname(__file__), "..", "data")`.
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt /app/requirements.txt
+# Generous timeout + retries for transient PyPI mirror flakes.
+RUN pip install --no-cache-dir --timeout 300 --retries 5 -r /app/requirements.txt
+
+COPY api/ /app/api/
+COPY data/ /app/data/
+
+EXPOSE 8000
+
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
