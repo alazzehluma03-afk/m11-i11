@@ -42,12 +42,60 @@ def load_fixture():
 
 def run() -> Tuple[float, list]:
     """Run the harness end-to-end. Returns (grounding_rate, per_question_results)."""
-    # TODO: implement per the methodology.
-    # Steps:
-    #   1. Load the fixture.
-    #   2. For each question, POST /rag/answer with the question and k.
-    #   3. Check is_decline first; if True, exclude from denominator.
-    #   4. Otherwise, gather the candidate_ids from the response's
-    #      `retrieved` field, call lib.grounding_scorer.is_grounded.
-    #   5. Aggregate grounding_rate = grounded / (total - declined).
-    raise NotImplementedError
+    fixture = load_fixture()
+    per_question_results = []
+    grounded_count = 0
+    denominator = 0
+
+    for row in fixture:
+        question_id = row["question_id"]
+        question = row.get("question", "")
+        k = row.get("k", 4)
+
+        response = httpx.post(
+            f"{API_URL}/rag/answer",
+            json={"question": question, "k": k},
+            timeout=60.0,
+        )
+        payload = response.json() if hasattr(response, "json") else {}
+        status_code = getattr(response, "status_code", 200)
+
+        if status_code >= 500:
+            grounded = False
+            declined = False
+            excluded = False
+        else:
+            declined = is_decline(payload)
+            if declined:
+                excluded = True
+            else:
+                candidate_ids = []
+                retrieved = payload.get("retrieved", []) or []
+                for item in retrieved:
+                    if isinstance(item, dict):
+                        chunk_id = item.get("chunk_id")
+                    else:
+                        chunk_id = item
+                    if chunk_id is not None:
+                        candidate_ids.append(str(chunk_id))
+                grounded = is_grounded(payload, candidate_ids)
+                excluded = False
+
+        if not excluded:
+            denominator += 1
+            if grounded:
+                grounded_count += 1
+
+        per_question_results.append(
+            {
+                "question_id": question_id,
+                "grounded": grounded,
+                "declined": declined,
+                "excluded": excluded,
+                "status_code": status_code,
+                "citations": payload.get("citations", []) if isinstance(payload, dict) else [],
+            }
+        )
+
+    grounding_rate = grounded_count / denominator if denominator else 0.0
+    return grounding_rate, per_question_results

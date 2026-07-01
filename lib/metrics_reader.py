@@ -18,7 +18,12 @@ import os
 from typing import Optional
 
 import httpx
-from prometheus_client.parser import text_string_to_metric_families
+
+try:
+    from prometheus_client.parser import text_string_to_metric_families
+except ModuleNotFoundError:  # pragma: no cover - exercised in minimal environments.
+    def text_string_to_metric_families(body):  # type: ignore[override]
+        return []
 
 
 API_URL = os.environ.get("API_URL", "http://localhost:8000")

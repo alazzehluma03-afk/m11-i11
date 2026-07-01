@@ -42,11 +42,43 @@ def load_fixture():
 
 def run() -> Tuple[float, float, float, list]:
     """Run the harness end-to-end. Returns (precision, recall, f1, per_doc_results)."""
-    # TODO: implement per the methodology.
-    # Steps:
-    #   1. Load the gold fixture.
-    #   2. For each document, POST /extract and collect the returned entities.
-    #   3. Build per-document prediction and gold mappings keyed by document_id.
-    #   4. Compute micro-averaged F1 across all documents and return the scores
-    #      plus per-document data for the report.
-    raise NotImplementedError
+    fixture = load_fixture()
+    predictions_by_doc = {}
+    gold_by_doc = {}
+    per_doc_results = []
+
+    for row in fixture:
+        document_id = row["document_id"]
+        gold_entities = row.get("gold_entities", [])
+        gold_by_doc[document_id] = gold_entities
+
+        response = httpx.post(
+            f"{API_URL}/extract",
+            json={"text": row.get("text", "")},
+            timeout=60.0,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        entities = payload.get("entities", []) or []
+        predictions_by_doc[document_id] = entities
+
+        tp, fp, fn = compute_micro_f1({document_id: entities}, {document_id: gold_entities})
+        precision = tp / (tp + fp) if (tp + fp) else 0.0
+        recall = tp / (tp + fn) if (tp + fn) else 0.0
+        f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
+        per_doc_results.append(
+            {
+                "document_id": document_id,
+                "tp": tp,
+                "fp": fp,
+                "fn": fn,
+                "precision": precision,
+                "recall": recall,
+                "f1": f1,
+                "predicted_entities": entities,
+                "gold_entities": gold_entities,
+            }
+        )
+
+    precision, recall, f1 = compute_micro_f1(predictions_by_doc, gold_by_doc)
+    return precision, recall, f1, per_doc_results
